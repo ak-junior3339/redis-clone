@@ -20,4 +20,9 @@ go run .
 | FLUSH | FLUSH | Delete all keys |
 | EXPIRE | EXPIRE \<key\> \<seconds\> | Set expiry on a key |
 | TTL | TTL \<key\> | Check remaining expiry time |
+<<<<<<< HEAD
 | EXIT | EXIT | Quit the program |
+=======
+| EXIT | EXIT | Quit the program |
+
+>>>>>>> 146b89588796f3a34e7bfbfc71258ad9e5a47eb6
