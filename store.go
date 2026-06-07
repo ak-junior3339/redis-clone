@@ -1,24 +1,32 @@
 package main
 
 import (
+	"os"
 	"sync"
 	"time"
 )
 
 type Store struct {
-	mu     sync.RWMutex
-	data   map[string]string
-	expiry map[string]time.Time
+	mu      sync.RWMutex
+	data    map[string]string
+	expiry  map[string]time.Time
+	walFile *os.File
 }
 
 func NewStore() *Store {
+	file, err := openWAL()
+	if err != nil {
+		panic("could not open WAL file")
+	}
 	return &Store{
-		data:   make(map[string]string),
-		expiry: make(map[string]time.Time),
+		data:    make(map[string]string),
+		expiry:  make(map[string]time.Time),
+		walFile: file,
 	}
 }
 
 func (s *Store) Set(key, value string) {
+	writeWAL(s.walFile, "SET "+key+" "+value)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data[key] = value
@@ -38,6 +46,7 @@ func (s *Store) Get(key string) (string, bool) {
 }
 
 func (s *Store) Delete(key string) {
+	writeWAL(s.walFile, "DEL "+key)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.data, key)
@@ -60,6 +69,7 @@ func (s *Store) Keys() []string {
 }
 
 func (s *Store) Flush() {
+	writeWAL(s.walFile, "FLUSH") // write first
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data = make(map[string]string)
