@@ -45,7 +45,7 @@ func main() {
 				fmt.Println("key not found")
 			}
 		case "DEL":
-			if len(parts) < 3 {
+			if len(parts) < 2 {
 				fmt.Println("usage: DEL <key> ")
 				fmt.Println("Please Try Again with Correct Usage.")
 				continue
