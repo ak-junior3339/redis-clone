@@ -14,18 +14,19 @@ Terminal 2 — connect to it:
 
 ## Commands
 
-| Command | Syntax                    | Usage                       |
-|---------|---------------------------|-----------------------------|
-| SET     | SET <key> <value>         | Store a key-value pair      |
-| GET     | GET <key>                 | Retrieve value by key       |
-| DEL     | DEL <key>                 | Delete a key-value pair     |
-| EXISTS  | EXISTS <key>              | Check if a key exists       |
-| KEYS    | KEYS                      | List all keys               |
-| FLUSH   | FLUSH                     | Delete all keys             |
-| EXPIRE  | EXPIRE <key> <seconds>    | Set expiry on a key         |
-| TTL     | TTL <key>                 | Check remaining expiry time |
-| HELP    | HELP                      | Show all commands           |
-| EXIT    | EXIT                      | Disconnect client           |
+| Command | Syntax                 | Usage                       |
+|---------|------------------------|-----------------------------|
+| SET     | SET <key> <value>      | Store a key-value pair      |
+| GET     | GET <key>              | Retrieve value by key       |
+| DEL     | DEL <key>              | Delete a key-value pair     |
+| EXISTS  | EXISTS <key>           | Check if a key exists       |
+| KEYS    | KEYS                   | List all keys               |
+| FLUSH   | FLUSH                  | Delete all keys             |
+| EXPIRE  | EXPIRE <key> <seconds> | Set expiry on a key         |
+| TTL     | TTL <key>              | Check remaining expiry time |
+| LOG     | LOG                    | Show WAL log (admin only)   |
+| HELP    | HELP                   | Show all commands           |
+| EXIT    | EXIT                   | Disconnect client           |
 
 ## Example Session
 
@@ -41,16 +42,16 @@ Terminal 2 — connect to it:
     8 seconds remaining
     DEL name
     OK
-## How it works
+    
+## How it Works
 
 - Data is stored in-memory using a Go map (hashmap)
 - sync.RWMutex ensures safe concurrent access
 - Each client connection runs in its own goroutine
-- Expiry uses lazy expiration — Expiry uses lazy expiration — when you set EXPIRE on a key, no timer
-or background job is started. The key stays in memory with a deadline
-attached. It is only removed when someone tries to GET it after the
-deadline has passed. This is the same approach Redis uses internally.
-
+- WAL (Write Ahead Log) persists every SET, DEL and FLUSH to disk so data survives server restarts
+- On startup the WAL file is replayed line by line to rebuild the map
+- Expiry uses lazy expiration — when you set EXPIRE on a key, no timer or background job is started. The key stays in memory with a deadline attached. It is only removed when someone tries to GET it after the deadline has passed. This is the same approach Redis uses internally.
+- LOG command is password protected — only admins can view the WAL log
 
 ## Author
 

@@ -111,6 +111,28 @@ func handleClient(conn net.Conn, store *Store) {
 					response = fmt.Sprintf("%d seconds remaining", remaining)
 				}
 			}
+		case "LOG":
+			// ask for password
+			fmt.Fprintln(conn, "Enter password:")
+
+			// read the password from client
+			if !scanner.Scan() {
+				response = "ERR could not read password"
+				continue
+			}
+
+			password := scanner.Text()
+
+			if password != "admin123" {
+				response = "ERR wrong password access denied"
+			} else {
+				log, err := readWAL()
+				if err != nil {
+					response = "ERR could not read WAL file"
+				} else {
+					response = log
+				}
+			}
 		case "HELP":
 			response = "SET    SET <key> <value>    Store a key-value pair\n" +
 				"GET    GET <key>            Retrieve value by key\n" +
